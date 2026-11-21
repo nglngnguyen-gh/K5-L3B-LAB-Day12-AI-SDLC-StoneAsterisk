@@ -1,0 +1,35 @@
+# AC-P4-30 — regression + soak + bench chạy trên CLONE SẠCH (minhtriet061203, Bench/QA)
+# Máy: Windows 10, Python 3.12.10 (python3 = shim), git bash. Không có pip/venv — chỉ thư viện chuẩn.
+commit 75695b614ff80430935904299350ffa199a28e59
+Python 3.12.10
+$ PYTHONPATH=tests:. python3 -m unittest discover -s tests
+Ran 209 tests in 46.883s
+
+OK (skipped=4)
+$ smoke
+12/12 mục đạt · headless_cmd: python3 -m chonoi.headless
+$ kiem-tat-dinh
+15/15 cặp giống từng byte · seeds [1, 42, -7] · 3600 tick
+headless gather exit=0 lines=63
+headless quan exit=0 lines=63
+headless day exit=0 lines=66
+headless kho thiếu exit=2
+$ python3 -m chonoi.soak --seed 7 --days 10 --out soak.json (x2)
+exit=0
+exit=0
+soak: {'days': 10, 'days_completed': 10, 'crashes': 0, 'duration_s': 1.617}
+   {'day': 1, 'earned': 0, 'reputation': 3.0, 'score': 300}
+   {'day': 2, 'earned': 0, 'reputation': 3.0, 'score': 300}
+   {'day': 3, 'earned': 0, 'reputation': 3.0, 'score': 300}
+   {'day': 4, 'earned': 0, 'reputation': 3.0, 'score': 300}
+   {'day': 5, 'earned': 0, 'reputation': 3.0, 'score': 300}
+   {'day': 6, 'earned': 0, 'reputation': 3.0, 'score': 300}
+   {'day': 7, 'earned': 0, 'reputation': 3.0, 'score': 300}
+   {'day': 8, 'earned': 0, 'reputation': 3.0, 'score': 300}
+   {'day': 9, 'earned': 0, 'reputation': 3.0, 'score': 300}
+   {'day': 10, 'earned': 0, 'reputation': 3.0, 'score': 300}
+soak lặp lại giống (bỏ duration_s): True
+$ python3 -m chonoi.bench --seed 42 --duration 30 --out bench.json
+exit=0
+{"avg_fps":60.0,"p1_low_fps":51.67,"frames":1800,"measured_s":30.0,"load_ms":45.5}
+

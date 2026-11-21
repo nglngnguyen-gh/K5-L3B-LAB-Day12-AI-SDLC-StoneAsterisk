@@ -23,6 +23,7 @@
 | 16 | 21/11 … | P2 · Trong `day`, khách/bếp/tay dựng sẵn (scenario `quan`) có món **ngoài** kế hoạch Ngày thì sao? (TICKET-02 mục 4.3: "Kho, khách, bếp và món thuộc kế hoạch được kiểm trên kho thực lúc mở quán") | Giả định (lát 3): là mâu thuẫn → mã 2, kiểm lúc dựng `QuanSim(menu_filter=…)`. Quán độc lập (`menu_filter=None`) vẫn nhận cả 6 món. | minhtriet061203 (chờ PO) |
 | 17 | 21/11 … | P3 · Nhiều đơn cùng có phần giữ vừa ươn trong một tick: nhả hết rồi mới giữ lại, hay xử lý từng đơn (nhả + giữ lại) theo (order_tick, id bàn)? | Giả định (lát 3): **từng đơn** theo (order_tick, id bàn) — đơn trước nhả + giữ lại xong mới tới đơn sau; phần giữ còn tươi của đơn chưa xử lý vẫn bị loại trừ. Phát hết `spoiled` theo id trước khi xử lý đơn nào. | minhtriet061203 (chờ PO) |
 | 18 | 21/11 … | P3 · Scenario v1.2: khách `eating` và payload món trên bếp/tay khai `base_price` thế nào khi giá chốt theo fresh? | Giả định (lát 3): số nguyên trong [0, giá niêm yết] (giá đã chốt = floor(giá × trung bình fresh / 100) ≤ giá niêm yết); v1.1 vẫn phải bằng giá niêm yết. | minhtriet061203 (chờ PO) |
+| 19 | 21/11 … | P4 · `LICENSE` cho repo: chọn giấy phép nào, có áp cho khung starter và đề lab không? | Giả định (Đóng gói): **MIT chỉ cho phần nhóm viết**; khung starter và đề (nhân vật, bối cảnh, Test Contract) theo điều khoản khóa học, ghi rõ trong `LICENSE` và `CREDITS.md`. | minhtriet061203 (chờ PO) |
 
 ## Giả định nhóm đã chốt (không cần hỏi, có căn cứ trong PRD)
 

@@ -2,9 +2,17 @@
 
 Game 2D quản lý quán ăn miền Tây (Day 12 · AI SDLC). Buổi sáng Út Sen lặn bắt cá, hái bông trên sông Chín Khúc; buổi tối nấu và phục vụ khách trên nhà bè của Má Tư. Thứ mang về từ buổi sáng quyết định quán bán được món nào.
 
-Nhóm: xem [`TEAM.md`](TEAM.md) · Kế hoạch: [`docs/plan/`](docs/plan/) · Hợp đồng tích hợp: [`docs/contracts/`](docs/contracts/README.md) · Kiểm chứng: [`docs/verification/`](docs/verification/)
+Nhóm: xem [`TEAM.md`](TEAM.md) · Kế hoạch: [`docs/plan/`](docs/plan/) · Hợp đồng tích hợp: [`docs/contracts/`](docs/contracts/README.md) · Kiểm chứng: [`docs/verification/`](docs/verification/) · Thay đổi: [`CHANGELOG.md`](CHANGELOG.md) · Giấy phép: [`LICENSE`](LICENSE) · Nguồn tài sản: [`CREDITS.md`](CREDITS.md)
 
-## Chạy từ clone sạch (macOS / Linux, cần Python 3, chỉ thư viện chuẩn)
+Phiên bản: **v1.0.0**, Test Contract **v1.3** (gameplay, tuning, kho và JSONL theo v1.2: nguyên liệu là cá thể có độ tươi).
+
+## Yêu cầu môi trường
+
+- **Python 3** (nhóm đã chạy với 3.12), **chỉ thư viện chuẩn**: không `pip install`, không bước build (`build_cmd` là `true`).
+- `git` và một trình duyệt bất kỳ (giao diện là trang web do `chonoi.live` phục vụ tại `127.0.0.1`).
+- macOS / Linux dùng `python3`. Trên Windows nếu không có lệnh `python3` thì thay bằng `python` (hoặc `py -3`) để chơi. Riêng bộ test hộp đen gọi đúng lệnh `python3` (`headless_cmd` trong manifest), nên cần có `python3` trên PATH (ví dụ một bản sao `python.exe` đặt tên `python3.exe`), và đổi `PYTHONPATH=tests:.` thành `PYTHONPATH=tests;.` (PowerShell: `$env:PYTHONPATH="tests;."`).
+
+## Chạy từ clone sạch (3 lệnh)
 
 ```bash
 git clone https://github.com/nglngnguyen-gh/K5-L3B-LAB-Day12-AI-SDLC-StoneAsterisk.git
@@ -23,6 +31,8 @@ Chơi buổi tối: `python3 -m chonoi.live --mode quan`. Nối hai buổi qua f
 | **Space** (`catch`) | Bắt đàn cá khi đang lặn | — |
 | **R** | Chơi lại | Chơi lại |
 
+Cảnh báo (thủy quái gần, oxy sắp hết, khách sắp giận) và chế độ tương phản cao: xem mục AC-P4-10/11 trong [`docs/verification/phase-4.md`](docs/verification/phase-4.md).
+
 Buổi sáng: oxy giảm khi lặn và hồi khi nổi lên, hết oxy thì ngạt mất Máu (3 Máu), hết Máu thì ngất và mất cả giỏ. Giỏ chứa tối đa 12 nguyên liệu. Buổi tối: khách gọi món nấu được từ kho, bạn nấu → bưng → phục vụ trước khi khách hết kiên nhẫn.
 
 ## Cách tính điểm
@@ -34,9 +44,10 @@ Buổi sáng: oxy giảm khi lặn và hồi khi nổi lên, hết oxy thì ng�
 - `earned`: tổng tiền thu cả lượt (nghìn đồng) = giá món + tiền boa.
 - Boa = `floor(giá món × 0.2)` nếu lúc phục vụ khách còn ≥ 50% kiên nhẫn; boa dương cộng 0.2 uy tín.
 - Khách bỏ đi vì hết kiên nhẫn: uy tín −0.5. Uy tín bắt đầu 3.0, kẹp trong [0, 5].
-- Giá: cá lóc nướng trui 60 · gỏi bông súng 40 · lẩu cá linh bông điên điển 120.
+- Giá niêm yết (nghìn đồng): gỏi bông súng 40 · cá lóc nướng trui 60 · cá kèo nướng 70 · canh chua cá lóc 90 · lẩu cá linh bông điên điển 120 · lẩu mắm 200. Mỗi Ngày chỉ bán các món trong kế hoạch Ngày (`day_plan`).
+- Độ tươi (v1.2): giá chốt lúc bắt đầu nấu = `floor(giá niêm yết × trung bình độ tươi / 100)`; nguyên liệu dưới 30 là ươn, không nấu được.
 
-Mọi số liệu nằm ở [`game.contract.json`](game.contract.json) (preset Test Contract v1.0).
+Mọi số liệu nằm ở [`game.contract.json`](game.contract.json) (Test Contract v1.3).
 
 ## Test và headless
 
@@ -44,12 +55,22 @@ Mọi số liệu nằm ở [`game.contract.json`](game.contract.json) (preset T
 PYTHONPATH=tests:. python3 -m unittest discover -s tests -v
 ```
 
-Chạy headless (Test Contract v1.0, 60 tick/s, cùng seed → output giống từng byte):
+Chạy headless (Test Contract v1.3, 60 tick/s, cùng seed → output giống từng byte; input sai → mã 2 trước khi ghi output):
 
 ```bash
 python3 -m chonoi.headless --mode gather --seed 1 --ticks 600 --out out.jsonl [--inventory-out kho.json]
 python3 -m chonoi.headless --mode quan   --seed 1 --ticks 600 --out out.jsonl [--inventory kho.json]
+python3 -m chonoi.headless --mode day    --seed 1 --ticks 600 --out out.jsonl [--days 1..5]   # gather → quan → shop
 ```
+
+Benchmark và soak (Test Contract v1.3, khai ở gốc `game.contract.json` là `bench_cmd` / `soak_cmd`):
+
+```bash
+python3 -m chonoi.bench --seed 42 --duration 30 --out bench.json   # cảnh lặn chuẩn, làm nóng 3 s rồi đo 30 s
+python3 -m chonoi.soak  --seed 7  --days 10    --out soak.json    # 10 Ngày trong một tiến trình, bot tất định
+```
+
+`bench.json` = `{avg_fps, p1_low_fps, frames, measured_s, load_ms}`; bench đo vòng mô phỏng 60 Hz + dựng trạng thái khung hình mà trình duyệt vẽ, **không đo phần vẽ canvas của trình duyệt**. `soak.json` = `{days, days_completed, crashes, results[], duration_s}`. Kết quả trên commit bàn giao: [`docs/proof/phase-4/`](docs/proof/phase-4/).
 
 Kiểm tích hợp và tất định (skill của nhóm, xem [`.agents/skills/`](.agents/skills/)):
 

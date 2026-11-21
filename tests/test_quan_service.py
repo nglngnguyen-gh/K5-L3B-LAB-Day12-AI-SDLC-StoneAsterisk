@@ -67,6 +67,48 @@ class QuanService(unittest.TestCase):
         self.assertEqual(got, [("B1", "C2"), ("B2", "C1")], "cùng order_tick -> id bàn T1 trước T2")
         self.assertEqual([st["state"] for st in session.sim.stoves], ["cooking", "cooking"])
 
+    def test_cooking_consumes_reserved_ids_and_locks_freshness_price(self):
+        scenario = {
+            "random_customers": False,
+            "stock": {"ca_linh": 3, "bong_dien_dien": 1},
+            "customers": [{"id": "C1", "table_id": "T1", "dish_id": "lau_ca_linh_dien_dien"}],
+        }
+        session = Session("quan", self.tuning, scenario, 1)
+        sim = session.sim
+        sim.stock = [
+            {"id": "I1", "kind": "ca_linh", "fresh_units": 21600},
+            {"id": "I2", "kind": "ca_linh", "fresh_units": 19200},
+            {"id": "I3", "kind": "ca_linh", "fresh_units": 24000},
+            {"id": "I4", "kind": "bong_dien_dien", "fresh_units": 24000},
+            {"id": "I5", "kind": "ca_linh", "fresh_units": 24000},
+        ]
+        sim.customers[0]["reserved"] = ["I3", "I1", "I4", "I2"]
+        events = []
+
+        self.assertTrue(sim._cook_at(sim.stoves[0], events))
+        started = events[0][1]
+        self.assertEqual(
+            started["items"],
+            [
+                {"id": "I4", "kind": "bong_dien_dien", "fresh": 100},
+                {"id": "I1", "kind": "ca_linh", "fresh": 90},
+                {"id": "I2", "kind": "ca_linh", "fresh": 80},
+                {"id": "I3", "kind": "ca_linh", "fresh": 100},
+            ],
+        )
+        self.assertEqual([item["id"] for item in sim.stock], ["I5"])
+        self.assertEqual(started["base_price"], 111)
+        self.assertEqual(sim.stoves[0]["dish"]["base_price"], 111)
+
+        sim.hand = dict(sim.stoves[0]["dish"])
+        sim.pos = list(sim.tables[0]["pos"])
+        controls = LiveInputs()
+        controls.set(interact=True)
+        sim._interact(controls.advance(), events)
+        served = events[-1][1]
+        self.assertEqual(served["base_price"], 111)
+        self.assertEqual(served["tip"], 22)
+
     def test_finished_meal_is_paid_after_eating_ticks(self):
         scenario = {
             "random_customers": False,

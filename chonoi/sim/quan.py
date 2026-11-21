@@ -17,8 +17,9 @@ Phase 2 (lát 3): `menu_filter` = id món trong day_plan[day].dishes (--mode day
 
 import math
 
+from ..errors import BadInput
 from ..ids import id_key, sort_by_id
-from ..items import ItemIds
+from ..items import ItemIds, price_by_fresh, public
 from .ramp import ramp_velocity
 
 TICK = 60.0
@@ -245,12 +246,25 @@ class QuanSim:
         customer = min(orders, key=lambda c: (c["order_tick"], id_key(c["table_id"])))
         dish_id = customer["dish_id"]
         recipe = self.menu[dish_id]["recipe"]
-        items = {kind: customer["reserved"].get(kind, 0) for kind in sorted(recipe)}
-        for kind, count in items.items():
-            self.stock[kind] = max(0, self.stock.get(kind, 0) - count)
-        customer["reserved"] = {}
+        if isinstance(self.stock, list):
+            reserved_ids = customer["reserved"]
+            stock_by_id = {item["id"]: item for item in self.stock}
+            if len(set(reserved_ids)) != len(reserved_ids) or any(item_id not in stock_by_id for item_id in reserved_ids):
+                raise BadInput(f"khách {customer['id']} giữ id nguyên liệu không có trong kho")
+            used = [stock_by_id[item_id] for item_id in reserved_ids]
+            used.sort(key=lambda item: (item["kind"], id_key(item["id"])))
+            items = [public(item) for item in used]
+            used_ids = set(reserved_ids)
+            self.stock = [item for item in self.stock if item["id"] not in used_ids]
+            customer["reserved"] = []
+            base_price = price_by_fresh(self.menu[dish_id]["price"], used)
+        else:
+            items = {kind: customer["reserved"].get(kind, 0) for kind in sorted(recipe)}
+            for kind, count in items.items():
+                self.stock[kind] = max(0, self.stock.get(kind, 0) - count)
+            customer["reserved"] = {}
+            base_price = self.menu[dish_id]["price"]
         customer["order_status"] = "assigned"
-        base_price = self.menu[dish_id]["price"]
         customer["base_price"] = base_price
         dish = {"order_id": customer["id"], "dish_id": dish_id, "base_price": base_price}
         stove.update(state="cooking", dish=dish,

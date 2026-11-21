@@ -30,8 +30,9 @@ Chơi buổi tối: `python3 -m chonoi.live --mode quan`. Nối hai buổi qua f
 | **E** (`interact`) | Cập bến (kết thúc buổi sáng) hoặc hái nút trên mặt nước | Nấu ở bếp, bưng món, phục vụ bàn |
 | **Space** (`catch`) | Bắt đàn cá khi đang lặn | — |
 | **R** | Chơi lại | Chơi lại |
+| **H** | Bật / tắt chế độ tương phản cao | Bật / tắt chế độ tương phản cao |
 
-Cảnh báo (thủy quái gần, oxy sắp hết, khách sắp giận) và chế độ tương phản cao: xem mục AC-P4-10/11 trong [`docs/verification/phase-4.md`](docs/verification/phase-4.md).
+Cảnh báo có chữ + biểu tượng: 🫧 ⚠ "OXY SẮP HẾT!" (oxy < 25%, thanh nhấp nháy) / "HẾT HƠI!", "Thủy quái!" khi quái ở gần, 😡 ⚠ "Sắp giận!" khi khách còn < 25% kiên nhẫn. Bằng chứng: AC-P4-10/11 trong [`docs/verification/phase-4.md`](docs/verification/phase-4.md).
 
 Buổi sáng: oxy giảm khi lặn và hồi khi nổi lên, hết oxy thì ngạt mất Máu (3 Máu), hết Máu thì ngất và mất cả giỏ. Giỏ chứa tối đa 12 nguyên liệu. Buổi tối: khách gọi món nấu được từ kho, bạn nấu → bưng → phục vụ trước khi khách hết kiên nhẫn.
 
@@ -79,15 +80,18 @@ python3 .agents/skills/smoke-hai-tien-trinh/smoke.py     # gather → file kho �
 python3 .agents/skills/kiem-tat-dinh/kiem_tat_dinh.py    # chạy 2 lần, so từng byte
 ```
 
+## Mở rộng đã làm
+
+### Cháy món quá hạn (`burn`, mã trong Test Contract)
+
+- Luật (TICKET-02 mục 3): món chín để quá `burn_s` = 20 s (> 1200 tick; đúng 1200 tick vẫn bưng được) thì cháy, phát `dish_burnt`, bếp rảnh ngay, nguyên liệu đã dùng mất. Thử giữ lại công thức ngay cho đơn (v1.2: cá thể tươi nhất theo id): đủ thì `reserved`, thiếu thì `unfulfillable` và khách chờ tới hết kiên nhẫn.
+- Khai trong `game.contract.json`: `"extensions": ["burn"]` cùng `"burn_s": 20`; `contract.py` từ chối nếu hai khóa không khớp. Mở rộng có mã trong Test Contract **chạy cả ở headless** (được chấm qua `headless_cmd`).
+- Người làm: len2412 (PR #8), Integrator sửa cho chạy ở headless (`790a3d0`).
+- Bằng chứng: `tests/test_quan_service.py` (cháy → giữ lại / `unfulfillable`), `tests/test_python_starter_units.py::test_headless_runs_declared_burn_extension` (headless: món chín 1199 tick → `dish_burnt` ở tick 2), ma trận [`docs/verification/phase-4.md`](docs/verification/phase-4.md) AC-P4-50.
+
 ## Sáng tạo của nhóm
 
-### Cháy món quá hạn (`burn`)
-
-- Ý tưởng: món chín để quá 20 giây sẽ cháy, bếp được dọn, nguyên liệu cũ mất; thử giữ lại công thức từ kho. Đủ nguyên liệu thì đơn `reserved`, thiếu thì `unfulfillable` và khách tiếp tục chờ.
-- Bật/tắt ở chơi live: trong `game.contract.json`, bật bằng `"extensions": ["burn"]` cùng `"burn_s": 20`; tắt bằng `"extensions": []` cùng `"burn_s": null`. Headless luôn tắt phần sáng tạo để giữ nguyên luật lõi.
-- Bằng chứng: `python -m unittest discover -s tests -p "test_quan_service.py" -v` (12 test), `python -m unittest discover -s tests -p "test_python_starter_units.py" -v` (9 test), và `python .agents/skills/kiem-tat-dinh/kiem_tat_dinh.py` (15/15 cặp giống từng byte).
-
-Khi thêm sáng tạo, mỗi mục ghi: ý tưởng · cách bật/tắt · bằng chứng lõi vẫn đúng (test + `kiem_tat_dinh.py` xanh, headless không đổi).
+_Chưa có mục sáng tạo ngoài đề._ Khi thêm sáng tạo, mỗi mục ghi: ý tưởng · cách bật/tắt · bằng chứng lõi vẫn đúng (test + `kiem_tat_dinh.py` xanh, headless không đổi).
 
 ---
 

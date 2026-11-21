@@ -1,0 +1,14 @@
+ĐẠT  | fresh 30 -> spoiled đúng tick 1
+ĐẠT  | gather chạy, mã 0
+ĐẠT  | gather kết thúc docked
+ĐẠT  | kho.json mảng cá thể sắp id, fresh sau 1 bước hao
+ĐẠT  | kho.json khớp gather_end.inventory (id/kind, fresh ±0.01)
+ĐẠT  | quan snapshot tick 0: đúng id, kind, độ tươi như file
+ĐẠT  | tick_limit không tạo file kho
+ĐẠT  | kho sai (kho_dem_v11) -> mã 2
+ĐẠT  | kho sai (kind_la) -> mã 2
+ĐẠT  | kho sai (id_trung) -> mã 2
+ĐẠT  | kho sai (fresh_ngoai_mien) -> mã 2
+ĐẠT  | kho sai (khoa_goc_la) -> mã 2
+
+12/12 mục đạt · headless_cmd: python3 -m chonoi.headless

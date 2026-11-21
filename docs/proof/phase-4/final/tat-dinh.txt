@@ -1,0 +1,18 @@
+ĐẠT  | seed    1 | gather-tu-do    | 744156 byte
+ĐẠT  | seed    1 | gather-inputs   | 178315 byte, kho {"items":[{"id":"I1","kind":"ca_linh","fresh":94.16666666666667},{"id":"I2","kind":"ca_linh","fresh":94.16666666666667},{"id":"I3","kind":"ca_linh","fresh":94.16666666666667},{"id":"I4","kind":"bong_dien_dien","fresh":95.66666666666667}]}
+ĐẠT  | seed    1 | quan-kho-mau    | 343890 byte
+ĐẠT  | seed    1 | quan-khong-kho  | 224356 byte
+ĐẠT  | seed    1 | day-2-ngay      | 6666764 byte
+ĐẠT  | seed   42 | gather-tu-do    | 744028 byte
+ĐẠT  | seed   42 | gather-inputs   | 175031 byte, kho {"items":[{"id":"I1","kind":"bong_dien_dien","fresh":95.66666666666667}]}
+ĐẠT  | seed   42 | quan-kho-mau    | 343890 byte
+ĐẠT  | seed   42 | quan-khong-kho  | 224356 byte
+ĐẠT  | seed   42 | day-2-ngay      | 6667390 byte
+ĐẠT  | seed   -7 | gather-tu-do    | 744089 byte
+ĐẠT  | seed   -7 | gather-inputs   | 174955 byte, kho {"items":[{"id":"I1","kind":"bong_dien_dien","fresh":95.66666666666667}]}
+ĐẠT  | seed   -7 | quan-kho-mau    | 343890 byte
+ĐẠT  | seed   -7 | quan-khong-kho  | 224356 byte
+ĐẠT  | seed   -7 | day-2-ngay      | 6664239 byte
+CẢNH BÁO | quan-kho-mau giống nhau ở mọi seed (bình thường khi chưa có lát 3)
+
+15/15 cặp giống từng byte · seeds [1, 42, -7] · 3600 tick

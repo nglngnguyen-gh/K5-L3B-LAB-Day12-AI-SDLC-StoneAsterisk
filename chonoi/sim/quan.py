@@ -63,6 +63,8 @@ class QuanSim:
         self.fr = Freshness(tuning) if self.v12 else None
         if self.v12:  # mảng cá thể nội bộ; scenario.stock là dạng công khai {id, kind, fresh}
             src = inventory if inventory is not None else scenario.get("stock", [])
+            if src == {}:  # gather bàn giao kho rỗng dạng đếm (vd. ngất) -> không có cá thể nào
+                src = []
             if not isinstance(src, list):
                 raise BadInput("contract v1.2: kho quán phải là mảng cá thể")
             self.stock = [dict(it) if "fresh_units" in it else from_public(it) for it in src]

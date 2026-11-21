@@ -1,0 +1,17 @@
+# AC-P4-20 — thử clone sạch theo README (minhtriet061203, Đóng gói)
+# Thư mục mới, trống; đúng 3 lệnh README, không cài thêm gì (chỉ thư viện chuẩn).
+# Máy kiểm: Windows 10 + git bash (nhóm không có macOS/Linux); python3 = shim trỏ Python 3.12.10.
+# Ghi chú: 2 lần chạy lệnh 3 đầu tiên báo 'python3: command not found' vì tôi đặt sai PATH tới shim
+#   (lỗi môi trường máy kiểm, không phải repo); sửa PATH rồi chạy lại, kết quả bên dưới.
+
+$ git clone https://github.com/nglngnguyen-gh/K5-L3B-LAB-Day12-AI-SDLC-StoneAsterisk.git
+exit=0 · commit=75695b6
+$ cd K5-L3B-LAB-Day12-AI-SDLC-StoneAsterisk
+$ python3 -m chonoi.live --mode gather
+GET / -> 200  GET /state -> 200 bytes=3687
+--- log live:
+Mở trình duyệt tại http://127.0.0.1:8000/  (chế độ gather, seed 1). Ctrl+C để dừng.
+state keys: ['earned', 'error', 'events', 'finished', 'fish', 'hold', 'hold_capacity', 'hold_count', 'meta', 'mode', 'money', 'monsters', 'nodes', 'phase', 'phase_tick', 'player', 'reason', 'reputation', 'score', 'sim_tick', 'state', 'tick', 'time_left_ticks', 'type']
+
+# GET / = trang chơi (index.html), GET /state = snapshot JSON mà client vẽ → bản có giao diện chạy được.
+# Server dừng bằng kill sau khi kiểm.

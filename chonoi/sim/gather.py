@@ -24,7 +24,7 @@ import math
 
 from ..ids import id_key, sort_by_id
 from ..inventory import hold_to_items
-from ..items import ItemIds
+from ..items import ItemIds, public_list
 from .ramp import ramp_velocity
 
 TICK = 60.0
@@ -153,7 +153,7 @@ class GatherSim:
                     self.hp -= 1
                     events.append(("choke", {"hp": self.hp}))
                     if self.hp == 0:
-                        lost = list(reversed(self.hold))
+                        lost = self._public_lost(reversed(self.hold))
                         self.hold.clear()
                         events.append(("faint", {"cause": "choke", "lost": lost, "hp": 0}))
                         self._finish("fainted", events)
@@ -183,6 +183,11 @@ class GatherSim:
         return events
 
     # --- tiện ích ---------------------------------------------------------------
+    @staticmethod
+    def _public_lost(items):
+        items = list(items)
+        return public_list(items) if items and isinstance(items[0], dict) else items
+
     def _move_monsters(self):
         """Cập nhật patrol/chase sau khi người chơi di chuyển, theo thứ tự id."""
         eligible = []
@@ -248,11 +253,11 @@ class GatherSim:
         m["state"] = "recoil"
         m["state_ticks_left"] = spec["recoil_ticks"]
         self.hp -= 1
-        lost = [self.hold.pop() for _ in range(math.floor(len(self.hold) * self.t["monsters"]["loss_ratio"]))]
+        lost = self._public_lost(self.hold.pop() for _ in range(math.floor(len(self.hold) * self.t["monsters"]["loss_ratio"])))
         self.invuln_ticks = self.t["monsters"]["invuln_ticks"]
         events.append(("monster_hit", {"monster_id": m["id"], "hp": self.hp, "lost": lost, "pos": list(self.pos)}))
         if self.hp == 0:
-            remaining = list(reversed(self.hold))
+            remaining = self._public_lost(reversed(self.hold))
             self.hold.clear()
             events.append(("faint", {"cause": "monster", "lost": remaining, "hp": 0}))
             self._finish("fainted", events)

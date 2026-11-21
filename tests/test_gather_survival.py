@@ -6,10 +6,30 @@ import unittest
 from helpers import Workdir, events, frames, read_jsonl, run_headless, snapshots, write_json
 from chonoi.contract import load_contract
 from chonoi.inputs import InputPlayer
+from chonoi.items import validate_public_items
 from chonoi.runner import Session
 
 
 class GatherSurvival(unittest.TestCase):
+    def test_v12_choke_loss_preserves_individuals_and_lifo(self):
+        tuning = load_contract()["tuning"]
+        tuning["freshness"] = {"initial": 100, "gather_decay_per_s": 0.5,
+                               "quan_decay_per_s": 0.25, "spoiled_below": 30}
+        fixture = [{"id": "I9", "kind": "ca_loc", "fresh": 99.5},
+                   {"id": "I2", "kind": "ca_loc", "fresh": 30},
+                   {"id": "I7", "kind": "bong_sung", "fresh": 23998 / 240}]
+        for hold in (fixture, []):
+            with self.subTest(hold=hold):
+                s = Session("gather", tuning, {"player": {"pos": [50, 5], "hp": 1,
+                            "oxygen_ticks": 0, "zero_oxy_ticks": 59}, "random_fish": False,
+                            "monsters": []}, 1)
+                # Cô lập logic mất hàng: phần khởi tạo giỏ v1.2 thuộc BLong1501.
+                s.sim.hold = validate_public_items(hold, "gather.hold")
+                result = s.step(InputPlayer([]).advance(0))
+                faint = next(e for e in result if e["name"] == "faint")
+                self.assertEqual(faint["data"]["lost"], list(reversed(hold)))
+                self.assertEqual(s.sim.hold, [])
+
     def test_no_transition_at_rest_and_initial_empty(self):
         with Workdir() as w:
             rows, _, _ = self.run_case(w, {"player": {"pos": [50, 5], "oxygen_ticks": 0}}, ticks=2)

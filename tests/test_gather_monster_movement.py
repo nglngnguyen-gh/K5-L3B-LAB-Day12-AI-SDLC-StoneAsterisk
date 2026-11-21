@@ -106,6 +106,32 @@ class MonsterCombat(unittest.TestCase):
     def step(self, s):
         return s.step(InputPlayer([]).advance(0))
 
+    def test_v12_hit_and_fatal_loss_keep_lifo_id_and_fresh(self):
+        from chonoi.items import validate_public_items
+
+        self.t["freshness"] = {"initial": 100, "gather_decay_per_s": 0.5,
+                               "quan_decay_per_s": 0.25, "spoiled_below": 30}
+        fixture = [{"id": "I8", "kind": "ca_loc", "fresh": 40},
+                   {"id": "I3", "kind": "ca_loc", "fresh": 99.5},
+                   {"id": "I1", "kind": "bong_sung", "fresh": 23998 / 240},
+                   {"id": "I5", "kind": "ca_linh", "fresh": 30}]
+        for hold, hp in ((fixture, 3), (fixture, 1), ([], 1)):
+            with self.subTest(count=len(hold), hp=hp):
+                s = self.make(player={"pos": [50, 20], "hp": hp})
+                s.sim.hold = validate_public_items(hold, "gather.hold")
+                result = self.step(s)
+                hit = next(e for e in result if e["name"] == "monster_hit")
+                count = len(hold) // 2
+                self.assertEqual(hit["data"]["lost"], list(reversed(hold))[:count])
+                if hp == 1:
+                    faint = next(e for e in result if e["name"] == "faint")
+                    self.assertEqual(faint["data"]["lost"], list(reversed(hold))[count:])
+                    self.assertFalse({it["id"] for it in hit["data"]["lost"]} &
+                                     {it["id"] for it in faint["data"]["lost"]})
+                    self.assertEqual(s.sim.hold, [])
+                else:
+                    self.assertEqual(s.sim.hold, validate_public_items(hold[:len(hold)-count]))
+
     def test_day_parameter_and_fixture_replacement(self):
         for day, expected in [(1, ["M1"]), (2, ["M1"]), (3, ["M1", "M2"])]:
             sim = GatherSim(self.t, {"random_fish": False}, Streams(1), IdAllocator(), day=day)
